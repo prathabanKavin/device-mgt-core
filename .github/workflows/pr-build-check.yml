@@ -3,7 +3,7 @@ name: PR Build Check
 on:
   pull_request:
     branches:
-      - srcbranch
+      - main # Change this to your target branch
 
 jobs:
   build:
@@ -12,6 +12,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Debug Workspace
+        run: |
+          echo "Workspace contents:"
+          ls -al ${{ github.workspace }}
+          echo "POM file location:"
+          find ${{ github.workspace }} -name "pom.xml"
 
       - name: Run Maven Build in Docker
         uses: addnab/docker-run-action@v3
@@ -22,5 +29,7 @@ jobs:
           volumes: |
             ${{ github.workspace }}:/workspace
           run: |
+            echo "Contents of /workspace inside the container:"
+            ls -al /workspace
             mvn clean install
 
