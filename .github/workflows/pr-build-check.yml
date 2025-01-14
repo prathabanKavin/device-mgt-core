@@ -13,23 +13,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Debug Workspace
-        run: |
-          echo "Workspace contents:"
-          ls -al ${{ github.workspace }}
-          echo "POM file location:"
-          find ${{ github.workspace }} -name "pom.xml"
-
       - name: Run Maven Build in Docker
         uses: addnab/docker-run-action@v3
         with:
           image: maven:3.9-eclipse-temurin-11
           options: --rm
-          workdir: /workspace
+          workdir: /
           volumes: |
-            ${{ github.workspace }}:/workspace
+            ${{ github.workspace }}:/
           run: |
-            echo "Contents of /workspace inside the container:"
-            ls -al /workspace
+            echo "Contents of / inside the container:"
+            ls -al /
             mvn clean install
 
