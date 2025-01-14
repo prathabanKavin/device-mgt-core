@@ -1,0 +1,22 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches:
+      - srcbranch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest 
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build using Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: jenkins/agent:jdk11
+          options: --rm 
+          run: |
+            mvn clean install
