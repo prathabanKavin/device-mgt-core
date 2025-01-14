@@ -16,7 +16,7 @@ jobs:
       - name: Build using Docker
         uses: addnab/docker-run-action@v3
         with:
-          image: jenkins/agent:jdk11
+          image: maven:3.9-eclipse-temurin-11
           options: --rm 
           run: |
             mvn clean install
