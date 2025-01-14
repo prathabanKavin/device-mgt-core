@@ -3,7 +3,7 @@ name: PR Build Check
 on:
   pull_request:
     branches:
-      - main # Change this to the target branch for PRs
+      - srcbranch
 
 jobs:
   build:
