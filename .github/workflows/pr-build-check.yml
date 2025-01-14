@@ -18,11 +18,11 @@ jobs:
         with:
           image: maven:3.9-eclipse-temurin-11
           options: --rm
-          workdir: /
+          workdir: /home
           volumes: |
-            ${{ github.workspace }}:/
+            ${{ github.workspace }}:/home
           run: |
             echo "Contents of / inside the container:"
-            ls -al /
+            ls -al /home
             mvn clean install
 
