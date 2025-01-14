@@ -7,16 +7,20 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build using Docker
+      - name: Run Maven Build in Docker
         uses: addnab/docker-run-action@v3
         with:
           image: maven:3.9-eclipse-temurin-11
-          options: --rm 
+          options: --rm
+          workdir: /workspace
+          volumes: |
+            ${{ github.workspace }}:/workspace
           run: |
             mvn clean install
+
