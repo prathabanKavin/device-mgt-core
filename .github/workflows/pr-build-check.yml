@@ -15,10 +15,10 @@ jobs:
         uses: actions/checkout@v4
 
       # Step 2: Set up Java
-      - name: Set up JDK 11.0.24 (Temurin)
+      - name: Set up JDK 11.0.24
         uses: actions/setup-java@v3
         with:
-          java-version: '11.0.24' # Use the specific version of OpenJDK 11
+          java-version: '11.0.24'
           distribution: 'temurin'
 
       # Step 3: Set up Maven
@@ -34,11 +34,6 @@ jobs:
         run: |
           java -version
           mvn -version
-      
-      - name: Authenticate GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "Using GitHub CLI with GITHUB_TOKEN"
 
       # Step 5: Cache Maven Dependencies
       - name: Cache Maven Dependencies
@@ -49,11 +44,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # Step 6: Run Maven Build
+      - name: Run Maven Build
+        id: maven_build
+        run: |
+          mvn clean install | tee build-log.txt
+          if grep -q "\[ERROR\] Tests run:" build-log.txt; then
+            echo "Tests failed!" >> result.txt
+            exit 1
+          elif grep -q "\[ERROR\]" build-log.txt; then
+            echo "Build failed!" >> result.txt
+            exit 2
+          else
+            echo "Build successful!" >> result.txt
+          fi
+
+      # Step 7: Add comments to PR
       - name: Comment on PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr comment ${{ github.event.pull_request.number }} --body "Build Passed! ✅"
-
-      # Step 6: Run Maven Build
-      - name: Run Maven Build
-        run: mvn clean install
+        if: ${{ always() }}
+        run: |
+          RESULT=$(cat result.txt)
+          if [[ "$RESULT" == *"Tests failed!"* ]]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Not Approved ❌: Test cases failed."
+          elif [[ "$RESULT" == *"Build failed!"* ]]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Not Approved ❌: Build failures."
+          else
+            gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Approved! ✅"
