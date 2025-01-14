@@ -3,27 +3,47 @@ name: PR Build Check
 on:
   pull_request:
     branches:
-      - srcbranch
+      - main # Change this to the target branch for PRs
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Maven Build in Docker
-        uses: addnab/docker-run-action@v3
+      # Step 2: Set up Java
+      - name: Set up JDK 11.0.24 (Temurin)
+        uses: actions/setup-java@v3
         with:
-          image: maven:3.9-eclipse-temurin-11
-          options: --rm
-          workdir: /home
-          volumes: |
-            ${{ github.workspace }}:/home:rw
-          run: |
-            echo "Contents of /home after mount:"
-            ls -al /home
-            cd /home || exit 1
-            mvn clean install
+          java-version: '11.0.24' # Use the specific version of OpenJDK 11
+          distribution: 'temurin'
 
+      # Step 3: Set up Maven
+      - name: Set up Maven 3.9.9
+        run: |
+          curl -fsSL https://downloads.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar xz -C /tmp/
+          sudo mv /tmp/apache-maven-3.9.9 /opt/maven
+          sudo ln -sf /opt/maven/bin/mvn /usr/bin/mvn
+          echo "Maven 3.9.9 installed"
+
+      # Step 4: Verify Java and Maven Versions
+      - name: Verify Java and Maven Versions
+        run: |
+          java -version
+          mvn -version
+
+      # Step 5: Cache Maven Dependencies
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Step 6: Run Maven Build
+      - name: Run Maven Build
+        run: mvn clean install
