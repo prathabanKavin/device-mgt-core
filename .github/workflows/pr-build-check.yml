@@ -59,7 +59,7 @@ jobs:
             echo "Build successful!" >> result.txt
           fi
 
-      # Step 7: Add comments to PR
+       # Step 7: Add comments to PR
       - name: Comment on PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,3 +72,4 @@ jobs:
             gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Not Approved ❌: Build failures."
           else
             gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Approved! ✅"
+          fi
