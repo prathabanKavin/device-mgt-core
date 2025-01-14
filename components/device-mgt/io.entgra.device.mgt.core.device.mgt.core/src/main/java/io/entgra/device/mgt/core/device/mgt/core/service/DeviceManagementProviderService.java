@@ -141,7 +141,7 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
      *                                   devices.
      */
-    PaginationResult getDevicesByType(PaginationRequest request) throws DeviceManagementException;
+    PaginationResult getDevicesByTypsssssse(PaginationRequest request) throws DeviceManagementException;
 
     /**
      * Method to retrieve all the devices with pagination support.
