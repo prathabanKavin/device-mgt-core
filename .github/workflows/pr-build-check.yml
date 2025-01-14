@@ -34,6 +34,11 @@ jobs:
         run: |
           java -version
           mvn -version
+      
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "Using GitHub CLI with GITHUB_TOKEN"
 
       # Step 5: Cache Maven Dependencies
       - name: Cache Maven Dependencies
@@ -45,6 +50,8 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr comment ${{ github.event.pull_request.number }} --body "Build Passed! ✅"
 
       # Step 6: Run Maven Build
