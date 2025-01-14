@@ -20,7 +20,7 @@ jobs:
           options: --rm
           workdir: /workspace
           volumes: |
-            ${{ github.workspace }}:/workspace
+            ${{ github.workspace }}:/workspace:rw
           run: |
             echo "Contents of /workspace inside the container:"
             ls -al /workspace
