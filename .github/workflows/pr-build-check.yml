@@ -44,6 +44,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Comment on PR
+        run: gh pr comment ${{ github.event.pull_request.number }} --body "Build Passed! ✅"
+
       # Step 6: Run Maven Build
       - name: Run Maven Build
         run: mvn clean install
