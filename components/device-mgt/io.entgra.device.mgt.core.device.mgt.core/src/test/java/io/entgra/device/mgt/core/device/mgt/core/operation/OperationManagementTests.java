@@ -112,7 +112,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
             throw new RuntimeException("Unable to mock getNotificationStrategy method", e);
         }
         this.commandActivity = operationManager.addOperation(
-                getOperation(new CommandOperation(), Operation.Type.COMMAND, COMMAND_OPERATION_CODE), this.deviceIds);
+                getOperation(new CommandOperation(), Operation.Type.COMMAND, "FAKE"), this.deviceIds);
         validateOperationResponse(this.commandActivity, ActivityStatus.Status.PENDING);
     }
 
@@ -123,7 +123,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
         try {
             ArrayList<DeviceIdentifier> invalidDevices = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
-                invalidDevices.add(new DeviceIdentifier(INVALID_DEVICE + i, DEVICE_TYPE));
+                invalidDevices.add(new DeviceIdentifier(INVALID_DEVICE + i, "ALL"));
             }
             invalidDevices.addAll(this.deviceIds);
             Activity activity = this.operationMgtService.addOperation(
