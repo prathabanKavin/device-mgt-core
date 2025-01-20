@@ -27,34 +27,31 @@ jobs:
         run: |
           echo "Build successful!" > result.txt
 
-      # Step 4: Post Comment on PR using explicit hardcoded token
-      - name: Post Comment on PR
+      # Step 4: Debug the request before sending
+      - name: Debug the request before sending
         run: |
-          # Explicitly hardcode the token here
-          TOKEN="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"
-
-          # Check the token value (only in testing, avoid printing in production)
-          echo "Using Token: $TOKEN"
-
           PR_NUMBER=${{ github.event.pull_request.number }}
           REPO=${{ github.repository }}
           RESULT=$(cat result.txt)
           
-          # Determine the comment body based on the build result
           if [[ "$RESULT" == "Build failed!" ]]; then
             COMMENT_BODY="PR Build Not Approved ❌"
           else
             COMMENT_BODY="PR Build Approved! ✅"
           fi
-
-          # Send the API request to post the comment
-          curl -v -X POST \
-            -H "Authorization: Bearer $TOKEN" \
+          
+          # Debugging: Print the request details
+          echo "Request URL: https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
+          echo "Token: ${{ secrets.PAT_TOKEN }}"
+          echo "Request Body: {\"body\": \"$COMMENT_BODY\"}"
+        
+          # Send the comment request
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"body\": \"$COMMENT_BODY\"}" \
             "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
-          
-      # Step 5: Final echo statement
-      - name: Final Step
-        run: |
-          echo "PR check completed, comment sent if successful"
+        
+      # Step 5: (Optional) Final confirmation step, can be removed or customized as needed
+      - name: Confirm completion
+        run: echo "PR check completed, comment sent if successful"
