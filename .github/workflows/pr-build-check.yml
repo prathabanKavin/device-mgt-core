@@ -21,6 +21,15 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      # Step 3: Verify Token Availability
+      - name: Verify Token is Available
+        run: |
+          if [[ -z "${{ secrets.PAT_TOKEN }}" ]]; then
+            echo "PAT_TOKEN is not set"
+          else
+            echo "PAT_TOKEN is set correctly"
+          fi
+
       # Step 4: Mock Build Success (disabled actual build step)
       - name: Mock Build Step
         id: mock_build
@@ -41,8 +50,9 @@ jobs:
           fi
           
           # Debugging: Print the request details
+          echo "Sending comment to PR number: $PR_NUMBER"
           echo "Request URL: https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
-          echo "Token: ***" # Hide the token from the logs
+          echo "Token: ***" # Masked for security reasons
           echo "Request Body: {\"body\": \"$COMMENT_BODY\"}"
         
           # Send the comment request
@@ -50,7 +60,8 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"body\": \"$COMMENT_BODY\"}" \
-            "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
+            "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments" \
+            -v
         
       # Step 6: (Optional) Final confirmation step, can be removed or customized as needed
       - name: Confirm completion
