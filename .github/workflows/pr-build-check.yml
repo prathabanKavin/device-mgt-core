@@ -3,7 +3,7 @@ name: PR Build Check
 on:
   pull_request:
     branches:
-      - test-pipeline
+      - master
 
 jobs:
   build:
@@ -44,27 +44,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 6: Run Maven Build
-      - name: Run Maven Build
-        id: maven_build
+      # Step 7: Install GitHub CLI
+      - name: Install GitHub CLI
         run: |
-          mvn clean install | tee build-log.txt
-          if grep -q "\[ERROR\] Tests run:" build-log.txt; then
-            echo "Tests failed!" >> result.txt
-            exit 1
-          elif grep -q "\[ERROR\]" build-log.txt; then
-            echo "Build failed!" >> result.txt
-            exit 2
-          else
-            echo "Build successful!" >> result.txt
-          fi
+          sudo apt-get update
+          sudo apt-get install -y gh
 
-       # Step 7: Add comments to PR
+      # Step 8: Add comments to PR
       - name: Comment on PR
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }} # Using the Personal Access Token
         if: ${{ always() }}
         run: |
+          echo "${{ secrets.PAT_TOKEN }}" | gh auth login --with-token
           RESULT=$(cat result.txt)
           if [[ "$RESULT" == *"Tests failed!"* ]]; then
             gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Not Approved ❌: Test cases failed."
