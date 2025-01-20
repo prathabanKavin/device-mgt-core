@@ -21,15 +21,17 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      # Step 3: Test Secret Access
       - name: Test Secret Access
         run: echo "Secret PAT_TOKEN is: ${{ secrets.PAT_TOKEN }}"
 
-      # Step 3: Mock Build Success (disabled actual build step)
+      # Step 4: Mock Build Success (disabled actual build step)
       - name: Mock Build Step
         id: mock_build
         run: |
           echo "Build successful!" > result.txt
-      # Step 4: Debug the request before sending
+
+      # Step 5: Debug the request before sending
       - name: Debug the request before sending
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
@@ -44,7 +46,7 @@ jobs:
           
           # Debugging: Print the request details
           echo "Request URL: https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
-          echo "Token: ${{ secrets.PAT_TOKEN }}"
+          echo "Token: ***" # Hide the token from the logs
           echo "Request Body: {\"body\": \"$COMMENT_BODY\"}"
         
           # Send the comment request
@@ -54,6 +56,6 @@ jobs:
             -d "{\"body\": \"$COMMENT_BODY\"}" \
             "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
         
-      # Step 5: (Optional) Final confirmation step, can be removed or customized as needed
+      # Step 6: (Optional) Final confirmation step, can be removed or customized as needed
       - name: Confirm completion
         run: echo "PR check completed, comment sent if successful"
