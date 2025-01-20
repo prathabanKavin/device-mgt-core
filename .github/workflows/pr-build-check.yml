@@ -3,7 +3,7 @@ name: PR Build Check
 on:
   pull_request:
     branches:
-      - master
+      - test-pipeline
 
 jobs:
   build:
@@ -44,16 +44,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 7: Install GitHub CLI
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gh
-
-      # Step 8: Add comments to PR
+      # Step 7: Add comments to PR
       - name: Comment on PR
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }} # Using the Personal Access Token
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         if: ${{ always() }}
         run: |
           echo "${{ secrets.PAT_TOKEN }}" | gh auth login --with-token
