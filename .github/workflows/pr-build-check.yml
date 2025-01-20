@@ -21,28 +21,37 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      # Step 4: Mock Build Success (disabled actual build step)
+      # Step 3: Mock Build Success (disabled actual build step)
       - name: Mock Build Step
         id: mock_build
         run: |
           echo "Build successful!" > result.txt
 
-      # Step 5: Add comments to PR using REST API
-      - name: Comment on PR
-        if: ${{ always() }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Use the Classic PAT here
+      # Step 4: Debug the request before sending
+      - name: Debug the request before sending
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           REPO=${{ github.repository }}
           RESULT=$(cat result.txt)
+          
           if [[ "$RESULT" == "Build failed!" ]]; then
             COMMENT_BODY="PR Build Not Approved ❌"
           else
             COMMENT_BODY="PR Build Approved! ✅"
           fi
+          
+          # Debugging: Print the request details
+          echo "Request URL: https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
+          echo "Token: ${{ secrets.PAT_TOKEN }}"  # You can print this for debugging, be cautious
+          echo "Request Body: {\"body\": \"$COMMENT_BODY\"}"
+        
+          # Send the comment request
           curl -X POST \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"body\": \"$COMMENT_BODY\"}" \
             "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
+        
+      # Step 5: (Optional) Final confirmation step, can be removed or customized as needed
+      - name: Confirm completion
+        run: echo "PR check completed, comment sent if successful"
