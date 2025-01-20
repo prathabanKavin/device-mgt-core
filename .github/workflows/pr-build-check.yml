@@ -30,6 +30,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # Step 4: Run Maven Build
+      - name: Run Maven Build
+        id: maven_build
+        run: |
+          mvn clean install || echo "Build failed!" > result.txt && exit 1
+          echo "Build successful!" > result.txt
+
       # Step 5: Add comments to PR using REST API
       - name: Comment on PR
         if: ${{ always() }}
@@ -40,10 +47,8 @@ jobs:
           REPO=${{ github.repository }}
           RESULT=$(cat result.txt)
 
-          if [[ "$RESULT" == *"Tests failed!"* ]]; then
-            COMMENT_BODY="PR Build Not Approved ❌: Test cases failed."
-          elif [[ "$RESULT" == *"Build failed!"* ]]; then
-            COMMENT_BODY="PR Build Not Approved ❌: Build failures."
+          if [[ "$RESULT" == *"Build failed!"* ]]; then
+            COMMENT_BODY="PR Build Not Approved ❌"
           else
             COMMENT_BODY="PR Build Approved! ✅"
           fi
