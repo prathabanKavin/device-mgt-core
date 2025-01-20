@@ -21,10 +21,6 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      # Step 3: Test Secret Access
-      - name: Test Secret Access
-        run: echo "Secret PAT_TOKEN is: ${{ secrets.PAT_TOKEN }}"
-
       # Step 4: Mock Build Success (disabled actual build step)
       - name: Mock Build Step
         id: mock_build
