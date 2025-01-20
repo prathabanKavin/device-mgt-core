@@ -15,27 +15,13 @@ jobs:
         uses: actions/checkout@v4
 
       # Step 2: Set up Java
-      - name: Set up JDK 11.0.24
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: '11.0.24'
+          java-version: '11'
           distribution: 'temurin'
 
-      # Step 3: Set up Maven
-      - name: Set up Maven 3.9.9
-        run: |
-          curl -fsSL https://downloads.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar xz -C /tmp/
-          sudo mv /tmp/apache-maven-3.9.9 /opt/maven
-          sudo ln -sf /opt/maven/bin/mvn /usr/bin/mvn
-          echo "Maven 3.9.9 installed"
-
-      # Step 4: Verify Java and Maven Versions
-      - name: Verify Java and Maven Versions
-        run: |
-          java -version
-          mvn -version
-
-      # Step 5: Cache Maven Dependencies
+      # Step 3: Cache Maven Dependencies
       - name: Cache Maven Dependencies
         uses: actions/cache@v3
         with:
@@ -44,18 +30,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 7: Add comments to PR
+      # Step 5: Add comments to PR using REST API
       - name: Comment on PR
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         if: ${{ always() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          echo "${{ secrets.PAT_TOKEN }}" | gh auth login --with-token
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
           RESULT=$(cat result.txt)
+
           if [[ "$RESULT" == *"Tests failed!"* ]]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Not Approved ❌: Test cases failed."
+            COMMENT_BODY="PR Build Not Approved ❌: Test cases failed."
           elif [[ "$RESULT" == *"Build failed!"* ]]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Not Approved ❌: Build failures."
+            COMMENT_BODY="PR Build Not Approved ❌: Build failures."
           else
-            gh pr comment ${{ github.event.pull_request.number }} --body "PR Build Approved! ✅"
+            COMMENT_BODY="PR Build Approved! ✅"
           fi
+
+          curl -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": \"$COMMENT_BODY\"}" \
+            "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments"
