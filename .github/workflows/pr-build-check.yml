@@ -21,12 +21,14 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: Test Secret Access
+        run: echo "Secret PAT_TOKEN is: ${{ secrets.PAT_TOKEN }}"
+
       # Step 3: Mock Build Success (disabled actual build step)
       - name: Mock Build Step
         id: mock_build
         run: |
           echo "Build successful!" > result.txt
-
       # Step 4: Debug the request before sending
       - name: Debug the request before sending
         run: |
