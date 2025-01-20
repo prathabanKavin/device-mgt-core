@@ -4,11 +4,6 @@ on:
   pull_request:
     branches:
       - test-pipeline
-      
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
 
 jobs:
   build:
@@ -67,7 +62,7 @@ jobs:
        # Step 7: Add comments to PR
       - name: Comment on PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         if: ${{ always() }}
         run: |
           RESULT=$(cat result.txt)
