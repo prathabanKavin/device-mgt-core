@@ -34,8 +34,13 @@ jobs:
       - name: Run Maven Build
         id: maven_build
         run: |
-          mvn clean install || echo "Build failed!" > result.txt && exit 1
-          echo "Build successful!" > result.txt
+          set -e
+          if mvn clean install; then
+            echo "Build successful!" > result.txt
+          else
+            echo "Build failed!" > result.txt
+            exit 1
+          fi
 
       # Step 5: Add comments to PR using REST API
       - name: Comment on PR
@@ -47,7 +52,7 @@ jobs:
           REPO=${{ github.repository }}
           RESULT=$(cat result.txt)
 
-          if [[ "$RESULT" == *"Build failed!"* ]]; then
+          if [[ "$RESULT" == "Build failed!" ]]; then
             COMMENT_BODY="PR Build Not Approved ❌"
           else
             COMMENT_BODY="PR Build Approved! ✅"
